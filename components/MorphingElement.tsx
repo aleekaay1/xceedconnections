@@ -496,8 +496,10 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
     makeFibonacciSphere(1.6), // Outro
   ], [particleCount]);
 
-  // Detect mobile
-  const [isMobile, setIsMobile] = React.useState(false);
+  // Detect mobile - initialize with actual window width to avoid flicker
+  const [isMobile, setIsMobile] = React.useState(() => 
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
   
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -507,6 +509,9 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
   }, []);
 
   // Section positions (alternating left/right on desktop, centered on mobile)
+  // IMPORTANT: Morph should be OPPOSITE of text side
+  // Overlay index 1,3,5 (odd): text LEFT → morph RIGHT
+  // Overlay index 2,4 (even): text RIGHT → morph LEFT
   const sectionOffsets = useMemo(() => {
     if (isMobile) {
       // Mobile: all centered
@@ -521,14 +526,14 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
       ];
     }
     
-    // Desktop: alternating left/right
+    // Desktop: morph OPPOSITE of text side (INVERTED)
     return [
       new THREE.Vector3(-2.4, 0.0, 0),  // Intro: far left
-      new THREE.Vector3(1.8, 0.0, 0),   // Medical: right
-      new THREE.Vector3(-1.8, 0.0, 0),  // Web: left
-      new THREE.Vector3(1.8, 0.0, 0),   // Robotics: right
-      new THREE.Vector3(-1.5, 0.0, 0),  // Gaming: left
-      new THREE.Vector3(1.6, 0.0, 0),   // Blockchain: right
+      new THREE.Vector3(-2.2, 0.0, 0),  // Medical (index 1): morph LEFT
+      new THREE.Vector3(2.2, 0.0, 0),   // Web (index 2): morph RIGHT
+      new THREE.Vector3(-2.2, 0.0, 0),  // Robotics (index 3): morph LEFT
+      new THREE.Vector3(2.2, 0.0, 0),   // Gaming (index 4): morph RIGHT
+      new THREE.Vector3(-2.2, 0.0, 0),  // Blockchain (index 5): morph LEFT
       new THREE.Vector3(0.0, 0.0, 0),   // Outro: center
     ];
   }, [isMobile]);
@@ -624,7 +629,8 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
     const offsetB = sectionOffsets[nextMorphIndex];
     
     // Push shapes UP (positive Y) to appear in gap above text
-    const verticalOffset = isMobile ? 1.3 : 1.8; // Slightly higher lift
+    // Desktop: much lower position (0.2), Mobile: higher to avoid overlapping text (1.3)
+    const verticalOffset = isMobile ? 1.3 : 0.2;
     
     pointsRef.current.position.set(
       THREE.MathUtils.lerp(offsetA.x, offsetB.x, easedProgress),

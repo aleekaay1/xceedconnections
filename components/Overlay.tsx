@@ -103,8 +103,8 @@ const SectionUI: React.FC<{ section: SectionData, index: number }> = ({ section,
             <div 
                 className="max-w-3xl mx-auto text-center md:text-left md:mx-0"
                 style={{ 
-                    marginLeft: typeof window !== 'undefined' && window.innerWidth >= 768 ? (morphRight ? 'auto' : '6rem') : 'auto',
-                    marginRight: typeof window !== 'undefined' && window.innerWidth >= 768 ? (morphRight ? '6rem' : 'auto') : 'auto',
+                    marginLeft: typeof window !== 'undefined' && window.innerWidth >= 768 ? (morphRight ? 'auto' : '6rem') : undefined,
+                    marginRight: typeof window !== 'undefined' && window.innerWidth >= 768 ? (morphRight ? '6rem' : 'auto') : undefined,
                 }}
             >
                 <h2 ref={titleRef} className="text-4xl md:text-6xl font-bold mb-3" style={{ color: section.accentColor }}>{section.title}</h2>
