@@ -56,16 +56,735 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
     return arr;
   };
 
-  // HOSTING: Server Rack
+  // HOSTING: Realistic Server Rack with LED indicators
   const makeServerRack = (): Float32Array => {
     const arr = new Float32Array(particleCount * 3);
-    const w = 2.5, h = 3.5;
-    const servers = 4;
+    const w = 2.8, h = 3.8;
+    const servers = 5;
     const serverH = h / servers;
     
     let idx = 0;
     
-    // Server rack frame (30% of particles)
+    // Server rack frame (25% of particles)
+    const frameCount = Math.floor(particleCount * 0.25);
+    const perimeter = (w + h) * 2;
+    for (let i = 0; i < frameCount && idx < particleCount; i++) {
+      const t = i / frameCount;
+      const dist = t * perimeter;
+      let x = 0, y = 0;
+      
+      if (dist < w) {
+        x = -w/2 + dist;
+        y = h/2;
+      } else if (dist < w + h) {
+        x = w/2;
+        y = h/2 - (dist - w);
+      } else if (dist < 2*w + h) {
+        x = w/2 - (dist - w - h);
+        y = -h/2;
+      } else {
+        x = -w/2;
+        y = -h/2 + (dist - 2*w - h);
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Individual server units (50% of particles)
+    const serverCount = Math.floor(particleCount * 0.5 / servers);
+    for (let s = 0; s < servers; s++) {
+      const serverY = h/2 - (s + 0.5) * serverH;
+      const serverW = w - 0.3;
+      
+      for (let i = 0; i < serverCount && idx < particleCount; i++) {
+        const t = i / serverCount;
+        const x = -serverW/2 + (t * serverW);
+        const y = serverY;
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // LED indicators (15% of particles)
+    const ledCount = Math.floor(particleCount * 0.15);
+    for (let s = 0; s < servers; s++) {
+      const serverY = h/2 - (s + 0.5) * serverH;
+      const ledsPerServer = Math.floor(ledCount / servers);
+      
+      for (let i = 0; i < ledsPerServer && idx < particleCount; i++) {
+        const ledX = w/2 - 0.2;
+        const ledY = serverY + ((i % 3) - 1) * 0.15;
+        
+        arr[idx * 3] = ledX;
+        arr[idx * 3 + 1] = ledY;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Network cables (10% of particles)
+    const cableCount = Math.floor(particleCount * 0.1);
+    for (let i = 0; i < cableCount && idx < particleCount; i++) {
+      const t = i / cableCount;
+      const x = -w/2 - 0.3;
+      const y = h/2 - (t * h);
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
+  // CONSULTATION: Professional Briefcase with details
+  const makeBriefcase = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 3.2, h = 2.2;
+    
+    let idx = 0;
+    
+    // Briefcase body (50% of particles)
+    const bodyCount = Math.floor(particleCount * 0.5);
+    const perimeter = (w + h) * 2;
+    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
+      const t = i / bodyCount;
+      const dist = t * perimeter;
+      let x = 0, y = 0;
+      
+      if (dist < w) {
+        x = -w/2 + dist;
+        y = h/2;
+      } else if (dist < w + h) {
+        x = w/2;
+        y = h/2 - (dist - w);
+      } else if (dist < 2*w + h) {
+        x = w/2 - (dist - w - h);
+        y = -h/2;
+      } else {
+        x = -w/2;
+        y = -h/2 + (dist - 2*w - h);
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Handle (15% of particles)
+    const handleCount = Math.floor(particleCount * 0.15);
+    for (let i = 0; i < handleCount && idx < particleCount; i++) {
+      const t = i / handleCount;
+      const x = -w/3 + (t * (2*w/3));
+      const y = h/2 + 0.4;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Combination locks (20% of particles)
+    const lockCount = Math.floor(particleCount * 0.2);
+    for (let i = 0; i < lockCount && idx < particleCount; i++) {
+      const side = (i % 2) ? 1 : -1;
+      const x = side * w/4;
+      const y = h/2 - 0.4;
+      
+      // Create circular lock shape
+      const lockAngle = (i / lockCount) * Math.PI * 2;
+      const lockRadius = 0.15;
+      const lockX = x + Math.cos(lockAngle) * lockRadius;
+      const lockY = y + Math.sin(lockAngle) * lockRadius;
+      
+      arr[idx * 3] = lockX;
+      arr[idx * 3 + 1] = lockY;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Corner reinforcements (15% of particles)
+    const cornerCount = Math.floor(particleCount * 0.15);
+    const corners = [
+      { x: -w/2 + 0.2, y: h/2 - 0.2 },
+      { x: w/2 - 0.2, y: h/2 - 0.2 },
+      { x: -w/2 + 0.2, y: -h/2 + 0.2 },
+      { x: w/2 - 0.2, y: -h/2 + 0.2 }
+    ];
+    
+    for (let c = 0; c < 4; c++) {
+      const cornerParticles = Math.floor(cornerCount / 4);
+      for (let i = 0; i < cornerParticles && idx < particleCount; i++) {
+        const angle = (i / cornerParticles) * Math.PI * 2;
+        const radius = 0.1;
+        const x = corners[c].x + Math.cos(angle) * radius;
+        const y = corners[c].y + Math.sin(angle) * radius;
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    return arr;
+  };
+
+  // WEB DEV: Laptop with Code Screen
+  const makeCodeBrackets = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const screenW = 3.0, screenH = 2.0;
+    const baseW = 3.2, baseH = 0.3;
+    
+    let idx = 0;
+    
+    // Laptop screen (40% of particles)
+    const screenCount = Math.floor(particleCount * 0.4);
+    const screenPerimeter = (screenW + screenH) * 2;
+    for (let i = 0; i < screenCount && idx < particleCount; i++) {
+      const t = i / screenCount;
+      const dist = t * screenPerimeter;
+      let x = 0, y = 0;
+      
+      if (dist < screenW) {
+        x = -screenW/2 + dist;
+        y = screenH/2 + 0.5;
+      } else if (dist < screenW + screenH) {
+        x = screenW/2;
+        y = screenH/2 + 0.5 - (dist - screenW);
+      } else if (dist < 2*screenW + screenH) {
+        x = screenW/2 - (dist - screenW - screenH);
+        y = -screenH/2 + 0.5;
+      } else {
+        x = -screenW/2;
+        y = -screenH/2 + 0.5 + (dist - 2*screenW - screenH);
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Code lines on screen (35% of particles)
+    const codeCount = Math.floor(particleCount * 0.35);
+    const lines = 8;
+    for (let line = 0; line < lines; line++) {
+      const lineParticles = Math.floor(codeCount / lines);
+      const lineY = screenH/2 + 0.5 - 0.2 - (line * 0.2);
+      
+      for (let i = 0; i < lineParticles && idx < particleCount; i++) {
+        const t = i / lineParticles;
+        const x = -screenW/2 + 0.3 + (t * (screenW - 0.6));
+        const y = lineY;
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Laptop base (15% of particles)
+    const baseCount = Math.floor(particleCount * 0.15);
+    for (let i = 0; i < baseCount && idx < particleCount; i++) {
+      const t = i / baseCount;
+      const x = -baseW/2 + (t * baseW);
+      const y = -screenH/2 + 0.5 - baseH/2;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Trackpad (10% of particles)
+    const trackpadCount = Math.floor(particleCount * 0.1);
+    for (let i = 0; i < trackpadCount && idx < particleCount; i++) {
+      const t = i / trackpadCount;
+      const angle = t * Math.PI * 2;
+      const radius = 0.3;
+      const x = Math.cos(angle) * radius;
+      const y = -screenH/2 + 0.5 - baseH - 0.2;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
+  // CONFIGURATION: Detailed Gear with Center Hub
+  const makeGear = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const outerRadius = 1.8;
+    const innerRadius = 0.8;
+    const teeth = 16;
+    const toothLength = 0.5;
+    
+    let idx = 0;
+    
+    // Outer gear teeth (40% of particles)
+    const toothCount = Math.floor(particleCount * 0.4);
+    for (let i = 0; i < toothCount && idx < particleCount; i++) {
+      const toothIdx = Math.floor((i / toothCount) * teeth);
+      const angle = (toothIdx / teeth) * Math.PI * 2;
+      const x = Math.cos(angle) * (outerRadius + toothLength);
+      const y = Math.sin(angle) * (outerRadius + toothLength);
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Main gear body (35% of particles)
+    const bodyCount = Math.floor(particleCount * 0.35);
+    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
+      const angle = (i / bodyCount) * Math.PI * 2;
+      const x = Math.cos(angle) * outerRadius;
+      const y = Math.sin(angle) * outerRadius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Center hub (15% of particles)
+    const hubCount = Math.floor(particleCount * 0.15);
+    for (let i = 0; i < hubCount && idx < particleCount; i++) {
+      const angle = (i / hubCount) * Math.PI * 2;
+      const x = Math.cos(angle) * innerRadius;
+      const y = Math.sin(angle) * innerRadius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Center hole (10% of particles)
+    const holeCount = Math.floor(particleCount * 0.1);
+    for (let i = 0; i < holeCount && idx < particleCount; i++) {
+      const angle = (i / holeCount) * Math.PI * 2;
+      const radius = 0.3;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
+  // CLOUD: Incognito/Private Cloud with Lock
+  const makeCloud = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    
+    let idx = 0;
+    
+    // Main cloud body (50% of particles)
+    const bodyCount = Math.floor(particleCount * 0.5);
+    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
+      const t = i / bodyCount;
+      const angle = t * Math.PI * 2;
+      
+      // Create realistic cloud shape with multiple overlapping circles
+      let x = 0, y = 0;
+      if (t < 0.2) {
+        // Left puff
+        x = -1.2 + Math.cos(angle * 0.2) * 0.9;
+        y = 0.3 + Math.sin(angle * 0.2) * 0.9;
+      } else if (t < 0.4) {
+        // Left-center
+        x = -0.4 + Math.cos(angle * 0.2) * 1.1;
+        y = 0.2 + Math.sin(angle * 0.2) * 1.1;
+      } else if (t < 0.6) {
+        // Center
+        x = Math.cos(angle * 0.2) * 1.4;
+        y = Math.sin(angle * 0.2) * 1.4;
+      } else if (t < 0.8) {
+        // Right-center
+        x = 0.4 + Math.cos(angle * 0.2) * 1.1;
+        y = 0.2 + Math.sin(angle * 0.2) * 1.1;
+      } else {
+        // Right puff
+        x = 1.2 + Math.cos(angle * 0.2) * 0.9;
+        y = 0.3 + Math.sin(angle * 0.2) * 0.9;
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Lock symbol in center (25% of particles)
+    const lockCount = Math.floor(particleCount * 0.25);
+    for (let i = 0; i < lockCount && idx < particleCount; i++) {
+      const t = i / lockCount;
+      const angle = t * Math.PI * 2;
+      const radius = 0.4;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Security indicators around cloud (15% of particles)
+    const securityCount = Math.floor(particleCount * 0.15);
+    const indicators = 6;
+    for (let ind = 0; ind < indicators; ind++) {
+      const indParticles = Math.floor(securityCount / indicators);
+      const angle = (ind / indicators) * Math.PI * 2;
+      const radius = 1.8;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      for (let i = 0; i < indParticles && idx < particleCount; i++) {
+        const t = i / indParticles;
+        const indAngle = t * Math.PI * 2;
+        const indRadius = 0.15;
+        const indX = x + Math.cos(indAngle) * indRadius;
+        const indY = y + Math.sin(indAngle) * indRadius;
+        
+        arr[idx * 3] = indX;
+        arr[idx * 3 + 1] = indY;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Connection lines (10% of particles)
+    const lineCount = Math.floor(particleCount * 0.1);
+    for (let i = 0; i < lineCount && idx < particleCount; i++) {
+      const t = i / lineCount;
+      const x = -1.8 + (t * 3.6);
+      const y = -1.0 + Math.sin(t * Math.PI * 3) * 0.2;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
+  // UI/UX: Incognito Design Interface
+  const makeDesignPalette = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 3.5, h = 3.0;
+    
+    let idx = 0;
+    
+    // Main interface frame (25% of particles)
+    const frameCount = Math.floor(particleCount * 0.25);
+    const perimeter = (w + h) * 2;
+    for (let i = 0; i < frameCount && idx < particleCount; i++) {
+      const t = i / frameCount;
+      const dist = t * perimeter;
+      let x = 0, y = 0;
+      
+      if (dist < w) {
+        x = -w/2 + dist;
+        y = h/2;
+      } else if (dist < w + h) {
+        x = w/2;
+        y = h/2 - (dist - w);
+      } else if (dist < 2*w + h) {
+        x = w/2 - (dist - w - h);
+        y = -h/2;
+      } else {
+        x = -w/2;
+        y = -h/2 + (dist - 2*w - h);
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Incognito mask icon (30% of particles)
+    const maskCount = Math.floor(particleCount * 0.3);
+    for (let i = 0; i < maskCount && idx < particleCount; i++) {
+      const t = i / maskCount;
+      const angle = t * Math.PI * 2;
+      const radius = 0.6;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Design canvas area (25% of particles)
+    const canvasCount = Math.floor(particleCount * 0.25);
+    const canvasW = w - 0.8, canvasH = h - 0.8;
+    for (let i = 0; i < canvasCount && idx < particleCount; i++) {
+      const t = i / canvasCount;
+      const angle = t * Math.PI * 2;
+      const radius = 0.3;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Privacy indicators (20% of particles)
+    const privacyCount = Math.floor(particleCount * 0.2);
+    const indicators = 4;
+    const positions = [
+      { x: -w/2 + 0.3, y: h/2 - 0.3 },
+      { x: w/2 - 0.3, y: h/2 - 0.3 },
+      { x: -w/2 + 0.3, y: -h/2 + 0.3 },
+      { x: w/2 - 0.3, y: -h/2 + 0.3 }
+    ];
+    
+    for (let p = 0; p < positions.length; p++) {
+      const posParticles = Math.floor(privacyCount / positions.length);
+      for (let i = 0; i < posParticles && idx < particleCount; i++) {
+        const angle = (i / posParticles) * Math.PI * 2;
+        const radius = 0.12;
+        const x = positions[p].x + Math.cos(angle) * radius;
+        const y = positions[p].y + Math.sin(angle) * radius;
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    return arr;
+  };
+
+  // PLANNING: Business Strategy Dashboard
+  const makeChart = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 3.5, h = 3.0;
+    
+    let idx = 0;
+    
+    // Dashboard frame (25% of particles)
+    const frameCount = Math.floor(particleCount * 0.25);
+    const perimeter = (w + h) * 2;
+    for (let i = 0; i < frameCount && idx < particleCount; i++) {
+      const t = i / frameCount;
+      const dist = t * perimeter;
+      let x = 0, y = 0;
+      
+      if (dist < w) {
+        x = -w/2 + dist;
+        y = h/2;
+      } else if (dist < w + h) {
+        x = w/2;
+        y = h/2 - (dist - w);
+      } else if (dist < 2*w + h) {
+        x = w/2 - (dist - w - h);
+        y = -h/2;
+      } else {
+        x = -w/2;
+        y = -h/2 + (dist - 2*w - h);
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Chart axes (20% of particles)
+    const axisCount = Math.floor(particleCount * 0.2);
+    for (let i = 0; i < axisCount && idx < particleCount; i++) {
+      const t = i / axisCount;
+      if (t < 0.5) {
+        // X-axis
+        const x = -w/2 + 0.3 + (t * 2) * (w - 0.6);
+        const y = -h/2 + 0.3;
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+      } else {
+        // Y-axis
+        const x = -w/2 + 0.3;
+        const y = -h/2 + 0.3 + ((t - 0.5) * 2) * (h - 0.6);
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+      }
+      idx++;
+    }
+    
+    // Chart bars (35% of particles)
+    const barCount = Math.floor(particleCount * 0.35);
+    const bars = 6;
+    for (let b = 0; b < bars; b++) {
+      const barParticles = Math.floor(barCount / bars);
+      const x = -w/2 + 0.4 + (b * (w - 0.8) / (bars - 1));
+      const barHeight = 0.2 + (b * 0.3);
+      
+      for (let i = 0; i < barParticles && idx < particleCount; i++) {
+        const t = i / barParticles;
+        const y = -h/2 + 0.3 + (t * barHeight);
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // KPI indicators (20% of particles)
+    const kpiCount = Math.floor(particleCount * 0.2);
+    const kpis = 4;
+    for (let k = 0; k < kpis; k++) {
+      const kpiParticles = Math.floor(kpiCount / kpis);
+      const kpiX = -w/2 + 0.3 + (k * (w - 0.6) / (kpis - 1));
+      const kpiY = h/2 - 0.3;
+      
+      for (let i = 0; i < kpiParticles && idx < particleCount; i++) {
+        const angle = (i / kpiParticles) * Math.PI * 2;
+        const radius = 0.2;
+        const x = kpiX + Math.cos(angle) * radius;
+        const y = kpiY + Math.sin(angle) * radius;
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    return arr;
+  };
+
+  // PROJECT: Kanban Board with Realistic Cards
+  const makeProjectBoard = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 4.0, h = 3.0;
+    const columns = 4;
+    
+    let idx = 0;
+    
+    // Board frame (20% of particles)
+    const frameCount = Math.floor(particleCount * 0.2);
+    const perimeter = (w + h) * 2;
+    for (let i = 0; i < frameCount && idx < particleCount; i++) {
+      const t = i / frameCount;
+      const dist = t * perimeter;
+      let x = 0, y = 0;
+      
+      if (dist < w) {
+        x = -w/2 + dist;
+        y = h/2;
+      } else if (dist < w + h) {
+        x = w/2;
+        y = h/2 - (dist - w);
+      } else if (dist < 2*w + h) {
+        x = w/2 - (dist - w - h);
+        y = -h/2;
+      } else {
+        x = -w/2;
+        y = -h/2 + (dist - 2*w - h);
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Column headers (15% of particles)
+    const headerCount = Math.floor(particleCount * 0.15);
+    for (let c = 0; c < columns; c++) {
+      const headerParticles = Math.floor(headerCount / columns);
+      const x = -w/2 + (c + 0.5) * (w / columns);
+      const y = h/2 - 0.2;
+      
+      for (let i = 0; i < headerParticles && idx < particleCount; i++) {
+        const t = i / headerParticles;
+        const headerX = x + ((t % 2) - 0.5) * 0.3;
+        const headerY = y + (Math.floor(t / 2) - 0.5) * 0.1;
+        
+        arr[idx * 3] = headerX;
+        arr[idx * 3 + 1] = headerY;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Column dividers (10% of particles)
+    const dividerCount = Math.floor(particleCount * 0.1);
+    for (let c = 1; c < columns; c++) {
+      const x = -w/2 + (c * w / columns);
+      for (let i = 0; i < dividerCount / (columns - 1) && idx < particleCount; i++) {
+        const t = i / (dividerCount / (columns - 1));
+        const y = -h/2 + 0.3 + (t * (h - 0.6));
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Task cards (55% of particles)
+    const cardCount = Math.floor(particleCount * 0.55);
+    const cardsPerColumn = 4;
+    for (let col = 0; col < columns; col++) {
+      for (let card = 0; card < cardsPerColumn; card++) {
+        const cardParticles = Math.floor(cardCount / (columns * cardsPerColumn));
+        const x = -w/2 + (col + 0.5) * (w / columns);
+        const y = h/2 - 0.4 - (card * 0.5);
+        
+        for (let i = 0; i < cardParticles && idx < particleCount; i++) {
+          const t = i / cardParticles;
+          const cardX = x + ((t % 3) - 1) * 0.25;
+          const cardY = y + (Math.floor(t / 3) - 1) * 0.15;
+          
+          arr[idx * 3] = cardX;
+          arr[idx * 3 + 1] = cardY;
+          arr[idx * 3 + 2] = 0;
+          idx++;
+        }
+      }
+    }
+    
+    return arr;
+  };
+
+  // SECURITY: Stealth/Incognito Security System
+  const makeShield = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 3.0, h = 3.5;
+    
+    let idx = 0;
+    
+    // Main stealth frame (30% of particles)
     const frameCount = Math.floor(particleCount * 0.3);
     const perimeter = (w + h) * 2;
     for (let i = 0; i < frameCount && idx < particleCount; i++) {
@@ -93,145 +812,12 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
       idx++;
     }
     
-    // Individual servers (60% of particles)
-    const serverCount = Math.floor(particleCount * 0.6 / servers);
-    for (let s = 0; s < servers; s++) {
-      const serverY = h/2 - (s + 0.5) * serverH;
-      for (let i = 0; i < serverCount && idx < particleCount; i++) {
-        const t = i / serverCount;
-        const x = -w/2 + 0.1 + (t * (w - 0.2));
-        const y = serverY;
-        
-        arr[idx * 3] = x;
-        arr[idx * 3 + 1] = y;
-        arr[idx * 3 + 2] = 0;
-        idx++;
-      }
-    }
-    
-    // Fill remaining
-    for (; idx < particleCount; idx++) {
-      arr[idx * 3] = 0;
-      arr[idx * 3 + 1] = 0;
-      arr[idx * 3 + 2] = 0;
-    }
-    
-    return arr;
-  };
-
-  // CONSULTATION: Briefcase
-  const makeBriefcase = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const w = 3.0, h = 2.0, d = 0.8;
-    
-    let idx = 0;
-    
-    // Briefcase body (60% of particles)
-    const bodyCount = Math.floor(particleCount * 0.6);
-    const perimeter = (w + h) * 2;
-    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
-      const t = i / bodyCount;
-      const dist = t * perimeter;
-      let x = 0, y = 0;
-      
-      if (dist < w) {
-        x = -w/2 + dist;
-        y = h/2;
-      } else if (dist < w + h) {
-        x = w/2;
-        y = h/2 - (dist - w);
-      } else if (dist < 2*w + h) {
-        x = w/2 - (dist - w - h);
-        y = -h/2;
-      } else {
-        x = -w/2;
-        y = -h/2 + (dist - 2*w - h);
-      }
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Handle (20% of particles)
-    const handleCount = Math.floor(particleCount * 0.2);
-    for (let i = 0; i < handleCount && idx < particleCount; i++) {
-      const t = i / handleCount;
-      const x = -w/3 + (t * (2*w/3));
-      const y = h/2 + 0.3;
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Locks (20% of particles)
-    const lockCount = Math.floor(particleCount * 0.2);
-    for (let i = 0; i < lockCount && idx < particleCount; i++) {
-      const side = (i % 2) ? 1 : -1;
-      const x = side * w/4;
-      const y = h/2 - 0.3;
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    return arr;
-  };
-
-  // WEB DEV: Code Brackets
-  const makeCodeBrackets = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const w = 2.5, h = 3.0;
-    
-    let idx = 0;
-    
-    // Left bracket (50% of particles)
-    const leftCount = Math.floor(particleCount * 0.5);
-    for (let i = 0; i < leftCount && idx < particleCount; i++) {
-      const t = i / leftCount;
-      const x = -w/2;
-      const y = h/2 - (t * h);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Right bracket (50% of particles)
-    const rightCount = Math.floor(particleCount * 0.5);
-    for (let i = 0; i < rightCount && idx < particleCount; i++) {
-      const t = i / rightCount;
-      const x = w/2;
-      const y = h/2 - (t * h);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    return arr;
-  };
-
-  // CONFIGURATION: Gear/Cog
-  const makeGear = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const radius = 1.5;
-    const teeth = 12;
-    const toothLength = 0.4;
-    
-    let idx = 0;
-    
-    // Main gear circle (60% of particles)
-    const circleCount = Math.floor(particleCount * 0.6);
-    for (let i = 0; i < circleCount && idx < particleCount; i++) {
-      const angle = (i / circleCount) * Math.PI * 2;
+    // Central stealth eye/monitor (25% of particles)
+    const eyeCount = Math.floor(particleCount * 0.25);
+    for (let i = 0; i < eyeCount && idx < particleCount; i++) {
+      const t = i / eyeCount;
+      const angle = t * Math.PI * 2;
+      const radius = 0.5;
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
       
@@ -241,311 +827,37 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
       idx++;
     }
     
-    // Gear teeth (40% of particles)
-    const toothCount = Math.floor(particleCount * 0.4);
-    for (let i = 0; i < toothCount && idx < particleCount; i++) {
-      const toothIdx = Math.floor((i / toothCount) * teeth);
-      const angle = (toothIdx / teeth) * Math.PI * 2;
-      const x = Math.cos(angle) * (radius + toothLength);
-      const y = Math.sin(angle) * (radius + toothLength);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    return arr;
-  };
-
-  // CLOUD: Cloud Shape
-  const makeCloud = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const centerRadius = 1.2;
-    const sideRadius = 0.8;
-    const topRadius = 1.0;
-    
-    let idx = 0;
-    
-    // Main cloud body (80% of particles)
-    const bodyCount = Math.floor(particleCount * 0.8);
-    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
-      const t = i / bodyCount;
-      const angle = t * Math.PI * 2;
-      
-      // Create cloud-like shape with multiple circles
-      let x = 0, y = 0;
-      if (t < 0.3) {
-        // Left side
-        x = -0.8 + Math.cos(angle * 0.3) * sideRadius;
-        y = Math.sin(angle * 0.3) * sideRadius;
-      } else if (t < 0.7) {
-        // Center
-        x = Math.cos(angle * 0.4) * centerRadius;
-        y = Math.sin(angle * 0.4) * centerRadius;
-      } else {
-        // Right side
-        x = 0.8 + Math.cos(angle * 0.3) * sideRadius;
-        y = Math.sin(angle * 0.3) * sideRadius;
-      }
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Top cloud puff (20% of particles)
-    const topCount = Math.floor(particleCount * 0.2);
-    for (let i = 0; i < topCount && idx < particleCount; i++) {
-      const angle = (i / topCount) * Math.PI * 2;
-      const x = Math.cos(angle) * topRadius;
-      const y = 1.0 + Math.sin(angle) * topRadius;
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    return arr;
-  };
-
-  // UI/UX: Design Palette
-  const makeDesignPalette = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const w = 2.5, h = 3.0;
-    
-    let idx = 0;
-    
-    // Palette outline (40% of particles)
-    const outlineCount = Math.floor(particleCount * 0.4);
-    const perimeter = (w + h) * 2;
-    for (let i = 0; i < outlineCount && idx < particleCount; i++) {
-      const t = i / outlineCount;
-      const dist = t * perimeter;
-      let x = 0, y = 0;
-      
-      if (dist < w) {
-        x = -w/2 + dist;
-        y = h/2;
-      } else if (dist < w + h) {
-        x = w/2;
-        y = h/2 - (dist - w);
-      } else if (dist < 2*w + h) {
-        x = w/2 - (dist - w - h);
-        y = -h/2;
-      } else {
-        x = -w/2;
-        y = -h/2 + (dist - 2*w - h);
-      }
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Color circles (60% of particles)
-    const colorCount = Math.floor(particleCount * 0.6);
-    const colors = 6;
-    for (let c = 0; c < colors; c++) {
-      const circleCount = Math.floor(colorCount / colors);
-      const angle = (c / colors) * Math.PI * 2;
-      const radius = 0.3;
-      const centerX = Math.cos(angle) * 0.8;
-      const centerY = Math.sin(angle) * 0.8;
-      
-      for (let i = 0; i < circleCount && idx < particleCount; i++) {
-        const t = i / circleCount;
-        const circleAngle = t * Math.PI * 2;
-        const x = centerX + Math.cos(circleAngle) * radius;
-        const y = centerY + Math.sin(circleAngle) * radius;
-        
-        arr[idx * 3] = x;
-        arr[idx * 3 + 1] = y;
-        arr[idx * 3 + 2] = 0;
-        idx++;
-      }
-    }
-    
-    return arr;
-  };
-
-  // PLANNING: Chart/Graph
-  const makeChart = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const w = 3.0, h = 2.5;
-    
-    let idx = 0;
-    
-    // Chart axes (30% of particles)
-    const axisCount = Math.floor(particleCount * 0.3);
-    for (let i = 0; i < axisCount && idx < particleCount; i++) {
-      const t = i / axisCount;
-      if (t < 0.5) {
-        // X-axis
-        const x = -w/2 + (t * 2) * w;
-        const y = -h/2;
-        arr[idx * 3] = x;
-        arr[idx * 3 + 1] = y;
-        arr[idx * 3 + 2] = 0;
-      } else {
-        // Y-axis
-        const x = -w/2;
-        const y = -h/2 + ((t - 0.5) * 2) * h;
-        arr[idx * 3] = x;
-        arr[idx * 3 + 1] = y;
-        arr[idx * 3 + 2] = 0;
-      }
-      idx++;
-    }
-    
-    // Chart bars (70% of particles)
-    const barCount = Math.floor(particleCount * 0.7);
-    const bars = 5;
-    for (let b = 0; b < bars; b++) {
-      const barParticles = Math.floor(barCount / bars);
-      const x = -w/2 + 0.3 + (b * (w - 0.6) / (bars - 1));
-      const barHeight = 0.3 + (b * 0.4);
-      
-      for (let i = 0; i < barParticles && idx < particleCount; i++) {
-        const t = i / barParticles;
-        const y = -h/2 + (t * barHeight);
-        
-        arr[idx * 3] = x;
-        arr[idx * 3 + 1] = y;
-        arr[idx * 3 + 2] = 0;
-        idx++;
-      }
-    }
-    
-    return arr;
-  };
-
-  // PROJECT: Project Management Board
-  const makeProjectBoard = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const w = 3.5, h = 2.5;
-    const columns = 3;
-    
-    let idx = 0;
-    
-    // Board outline (30% of particles)
-    const outlineCount = Math.floor(particleCount * 0.3);
-    const perimeter = (w + h) * 2;
-    for (let i = 0; i < outlineCount && idx < particleCount; i++) {
-      const t = i / outlineCount;
-      const dist = t * perimeter;
-      let x = 0, y = 0;
-      
-      if (dist < w) {
-        x = -w/2 + dist;
-        y = h/2;
-      } else if (dist < w + h) {
-        x = w/2;
-        y = h/2 - (dist - w);
-      } else if (dist < 2*w + h) {
-        x = w/2 - (dist - w - h);
-        y = -h/2;
-      } else {
-        x = -w/2;
-        y = -h/2 + (dist - 2*w - h);
-      }
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Column dividers (20% of particles)
-    const dividerCount = Math.floor(particleCount * 0.2);
-    for (let c = 1; c < columns; c++) {
-      const x = -w/2 + (c * w / columns);
-      for (let i = 0; i < dividerCount / (columns - 1) && idx < particleCount; i++) {
-        const t = i / (dividerCount / (columns - 1));
-        const y = -h/2 + (t * h);
-        
-        arr[idx * 3] = x;
-        arr[idx * 3 + 1] = y;
-        arr[idx * 3 + 2] = 0;
-        idx++;
-      }
-    }
-    
-    // Task cards (50% of particles)
-    const cardCount = Math.floor(particleCount * 0.5);
-    const cardsPerColumn = 3;
-    for (let col = 0; col < columns; col++) {
-      for (let card = 0; card < cardsPerColumn; card++) {
-        const cardParticles = Math.floor(cardCount / (columns * cardsPerColumn));
-        const x = -w/2 + (col + 0.5) * (w / columns);
-        const y = h/2 - 0.3 - (card * 0.6);
-        
-        for (let i = 0; i < cardParticles && idx < particleCount; i++) {
-          const t = i / cardParticles;
-          const cardX = x + ((t % 2) - 0.5) * 0.4;
-          const cardY = y + (Math.floor(t / 2) - 0.5) * 0.2;
-          
-          arr[idx * 3] = cardX;
-          arr[idx * 3 + 1] = cardY;
-          arr[idx * 3 + 2] = 0;
-          idx++;
-        }
-      }
-    }
-    
-    return arr;
-  };
-
-  // SECURITY: Shield
-  const makeShield = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const w = 2.0, h = 3.0;
-    
-    let idx = 0;
-    
-    // Shield outline (60% of particles)
-    const outlineCount = Math.floor(particleCount * 0.6);
-    for (let i = 0; i < outlineCount && idx < particleCount; i++) {
-      const t = i / outlineCount;
-      let x = 0, y = 0;
-      
-      if (t < 0.3) {
-        // Top curve
-        const angle = (t / 0.3) * Math.PI;
-        x = Math.sin(angle) * (w / 2);
-        y = h/2 - Math.cos(angle) * (h / 2);
-      } else if (t < 0.7) {
-        // Sides
-        const sideT = (t - 0.3) / 0.4;
-        const side = sideT < 0.5 ? -1 : 1;
-        const sideProgress = sideT < 0.5 ? sideT * 2 : (sideT - 0.5) * 2;
-        x = side * (w / 2);
-        y = h/2 - sideProgress * h;
-      } else {
-        // Bottom point
-        const bottomT = (t - 0.7) / 0.3;
-        x = (1 - bottomT) * (w / 2);
-        y = -h/2 + bottomT * 0.2;
-      }
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Lock symbol (40% of particles)
-    const lockCount = Math.floor(particleCount * 0.4);
-    for (let i = 0; i < lockCount && idx < particleCount; i++) {
-      const t = i / lockCount;
-      const angle = t * Math.PI * 2;
-      const radius = 0.3;
+    // Stealth indicators around perimeter (25% of particles)
+    const stealthCount = Math.floor(particleCount * 0.25);
+    const indicators = 8;
+    for (let ind = 0; ind < indicators; ind++) {
+      const indParticles = Math.floor(stealthCount / indicators);
+      const angle = (ind / indicators) * Math.PI * 2;
+      const radius = 1.3;
       const x = Math.cos(angle) * radius;
       const y = Math.sin(angle) * radius;
       
+      for (let i = 0; i < indParticles && idx < particleCount; i++) {
+        const t = i / indParticles;
+        const indAngle = t * Math.PI * 2;
+        const indRadius = 0.12;
+        const indX = x + Math.cos(indAngle) * indRadius;
+        const indY = y + Math.sin(indAngle) * indRadius;
+        
+        arr[idx * 3] = indX;
+        arr[idx * 3 + 1] = indY;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Encryption lines (20% of particles)
+    const encryptionCount = Math.floor(particleCount * 0.2);
+    for (let i = 0; i < encryptionCount && idx < particleCount; i++) {
+      const t = i / encryptionCount;
+      const x = -w/2 + 0.3 + (t * (w - 0.6));
+      const y = -h/2 + 0.3 + Math.sin(t * Math.PI * 6) * 0.2;
+      
       arr[idx * 3] = x;
       arr[idx * 3 + 1] = y;
       arr[idx * 3 + 2] = 0;
@@ -555,26 +867,27 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
     return arr;
   };
 
-  // INTERNET: Network Nodes
+  // INTERNET: Global Network Infrastructure
   const makeNetwork = (): Float32Array => {
     const arr = new Float32Array(particleCount * 3);
-    const nodes = 6;
-    const radius = 1.5;
+    const nodes = 8;
+    const outerRadius = 2.0;
+    const innerRadius = 1.0;
     
     let idx = 0;
     
-    // Network nodes (50% of particles)
-    const nodeCount = Math.floor(particleCount * 0.5);
+    // Outer network nodes (40% of particles)
+    const outerNodeCount = Math.floor(particleCount * 0.4);
     for (let n = 0; n < nodes; n++) {
-      const nodeParticles = Math.floor(nodeCount / nodes);
+      const nodeParticles = Math.floor(outerNodeCount / nodes);
       const angle = (n / nodes) * Math.PI * 2;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius;
+      const x = Math.cos(angle) * outerRadius;
+      const y = Math.sin(angle) * outerRadius;
       
       for (let i = 0; i < nodeParticles && idx < particleCount; i++) {
         const t = i / nodeParticles;
         const nodeAngle = t * Math.PI * 2;
-        const nodeRadius = 0.2;
+        const nodeRadius = 0.25;
         const nodeX = x + Math.cos(nodeAngle) * nodeRadius;
         const nodeY = y + Math.sin(nodeAngle) * nodeRadius;
         
@@ -585,18 +898,53 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
       }
     }
     
-    // Connection lines (50% of particles)
-    const lineCount = Math.floor(particleCount * 0.5);
+    // Inner hub (20% of particles)
+    const hubCount = Math.floor(particleCount * 0.2);
+    for (let i = 0; i < hubCount && idx < particleCount; i++) {
+      const t = i / hubCount;
+      const angle = t * Math.PI * 2;
+      const radius = 0.3;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Connection lines to hub (25% of particles)
+    const hubLineCount = Math.floor(particleCount * 0.25);
     for (let n = 0; n < nodes; n++) {
-      const nextN = (n + 1) % nodes;
+      const angle = (n / nodes) * Math.PI * 2;
+      const x1 = Math.cos(angle) * outerRadius;
+      const y1 = Math.sin(angle) * outerRadius;
+      
+      const lineParticles = Math.floor(hubLineCount / nodes);
+      for (let i = 0; i < lineParticles && idx < particleCount; i++) {
+        const t = i / lineParticles;
+        const x = x1 + (0 - x1) * t;
+        const y = y1 + (0 - y1) * t;
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Inter-node connections (15% of particles)
+    const interLineCount = Math.floor(particleCount * 0.15);
+    for (let n = 0; n < nodes; n += 2) {
+      const nextN = (n + 2) % nodes;
       const angle1 = (n / nodes) * Math.PI * 2;
       const angle2 = (nextN / nodes) * Math.PI * 2;
-      const x1 = Math.cos(angle1) * radius;
-      const y1 = Math.sin(angle1) * radius;
-      const x2 = Math.cos(angle2) * radius;
-      const y2 = Math.sin(angle2) * radius;
+      const x1 = Math.cos(angle1) * outerRadius;
+      const y1 = Math.sin(angle1) * outerRadius;
+      const x2 = Math.cos(angle2) * outerRadius;
+      const y2 = Math.sin(angle2) * outerRadius;
       
-      const lineParticles = Math.floor(lineCount / nodes);
+      const lineParticles = Math.floor(interLineCount / (nodes / 2));
       for (let i = 0; i < lineParticles && idx < particleCount; i++) {
         const t = i / lineParticles;
         const x = x1 + (x2 - x1) * t;
@@ -612,23 +960,34 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
     return arr;
   };
 
-  // MARKETING: Megaphone
+  // MARKETING: Social Media Newsfeed with Ads
   const makeMegaphone = (): Float32Array => {
     const arr = new Float32Array(particleCount * 3);
-    const length = 3.0;
-    const startRadius = 0.3;
-    const endRadius = 1.2;
+    const w = 3.5, h = 3.5;
     
     let idx = 0;
     
-    // Megaphone body (80% of particles)
-    const bodyCount = Math.floor(particleCount * 0.8);
-    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
-      const t = i / bodyCount;
-      const angle = t * Math.PI * 2;
-      const currentRadius = startRadius + (t * (endRadius - startRadius));
-      const x = Math.cos(angle) * currentRadius;
-      const y = -length/2 + (t * length);
+    // Newsfeed frame (20% of particles)
+    const frameCount = Math.floor(particleCount * 0.2);
+    const perimeter = (w + h) * 2;
+    for (let i = 0; i < frameCount && idx < particleCount; i++) {
+      const t = i / frameCount;
+      const dist = t * perimeter;
+      let x = 0, y = 0;
+      
+      if (dist < w) {
+        x = -w/2 + dist;
+        y = h/2;
+      } else if (dist < w + h) {
+        x = w/2;
+        y = h/2 - (dist - w);
+      } else if (dist < 2*w + h) {
+        x = w/2 - (dist - w - h);
+        y = -h/2;
+      } else {
+        x = -w/2;
+        y = -h/2 + (dist - 2*w - h);
+      }
       
       arr[idx * 3] = x;
       arr[idx * 3 + 1] = y;
@@ -636,17 +995,65 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
       idx++;
     }
     
-    // Handle (20% of particles)
-    const handleCount = Math.floor(particleCount * 0.2);
-    for (let i = 0; i < handleCount && idx < particleCount; i++) {
-      const t = i / handleCount;
-      const x = -startRadius - 0.2;
-      const y = -length/2 + (t * 0.8);
+    // Newsfeed posts (40% of particles)
+    const postCount = Math.floor(particleCount * 0.4);
+    const posts = 5;
+    for (let p = 0; p < posts; p++) {
+      const postParticles = Math.floor(postCount / posts);
+      const postY = h/2 - 0.4 - (p * 0.6);
+      const postW = w - 0.6;
       
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
+      for (let i = 0; i < postParticles && idx < particleCount; i++) {
+        const t = i / postParticles;
+        const x = -postW/2 + (t * postW);
+        const y = postY;
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Ad dashlines (25% of particles)
+    const adCount = Math.floor(particleCount * 0.25);
+    const ads = 3;
+    for (let a = 0; a < ads; a++) {
+      const adParticles = Math.floor(adCount / ads);
+      const adY = h/2 - 0.7 - (a * 0.6);
+      const adW = w - 0.8;
+      
+      for (let i = 0; i < adParticles && idx < particleCount; i++) {
+        const t = i / adParticles;
+        const x = -adW/2 + (t * adW);
+        const y = adY + Math.sin(t * Math.PI * 8) * 0.05; // Dashed line effect
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Social media icons (15% of particles)
+    const socialCount = Math.floor(particleCount * 0.15);
+    const platforms = 4;
+    for (let p = 0; p < platforms; p++) {
+      const platformParticles = Math.floor(socialCount / platforms);
+      const x = -w/2 + 0.3 + (p * (w - 0.6) / (platforms - 1));
+      const y = -h/2 + 0.3;
+      
+      for (let i = 0; i < platformParticles && idx < particleCount; i++) {
+        const angle = (i / platformParticles) * Math.PI * 2;
+        const radius = 0.15;
+        const platformX = x + Math.cos(angle) * radius;
+        const platformY = y + Math.sin(angle) * radius;
+        
+        arr[idx * 3] = platformX;
+        arr[idx * 3 + 1] = platformY;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
     }
     
     return arr;
@@ -690,23 +1097,35 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
       // Mobile: all centered
       return [
         new THREE.Vector3(0, 0, 0),  // Intro
-        new THREE.Vector3(0, 0, 0),  // Medical
-        new THREE.Vector3(0, 0, 0),  // Web
-        new THREE.Vector3(0, 0, 0),  // Robotics
-        new THREE.Vector3(0, 0, 0),  // Gaming
-        new THREE.Vector3(0, 0, 0),  // Blockchain
+        new THREE.Vector3(0, 0, 0),  // Hosting
+        new THREE.Vector3(0, 0, 0),  // Consultation
+        new THREE.Vector3(0, 0, 0),  // Web Dev
+        new THREE.Vector3(0, 0, 0),  // Configuration
+        new THREE.Vector3(0, 0, 0),  // Cloud
+        new THREE.Vector3(0, 0, 0),  // UI/UX
+        new THREE.Vector3(0, 0, 0),  // Planning
+        new THREE.Vector3(0, 0, 0),  // Project
+        new THREE.Vector3(0, 0, 0),  // Security
+        new THREE.Vector3(0, 0, 0),  // Internet
+        new THREE.Vector3(0, 0, 0),  // Marketing
         new THREE.Vector3(0, 0, 0),  // Outro
       ];
     }
     
-    // Desktop: morph OPPOSITE of text side (INVERTED)
+    // Desktop: morph OPPOSITE of text side (INVERTED) - alternating pattern
     return [
       new THREE.Vector3(-2.4, 0.0, 0),  // Intro: far left
-      new THREE.Vector3(-2.2, 0.0, 0),  // Medical (index 1): morph LEFT
-      new THREE.Vector3(2.2, 0.0, 0),   // Web (index 2): morph RIGHT
-      new THREE.Vector3(-2.2, 0.0, 0),  // Robotics (index 3): morph LEFT
-      new THREE.Vector3(2.2, 0.0, 0),   // Gaming (index 4): morph RIGHT
-      new THREE.Vector3(-2.2, 0.0, 0),  // Blockchain (index 5): morph LEFT
+      new THREE.Vector3(-2.2, 0.0, 0),  // Hosting (index 1): morph LEFT, text RIGHT
+      new THREE.Vector3(2.2, 0.0, 0),   // Consultation (index 2): morph RIGHT, text LEFT
+      new THREE.Vector3(-2.2, 0.0, 0),  // Web Dev (index 3): morph LEFT, text RIGHT
+      new THREE.Vector3(2.2, 0.0, 0),   // Configuration (index 4): morph RIGHT, text LEFT
+      new THREE.Vector3(-2.2, 0.0, 0),  // Cloud (index 5): morph LEFT, text RIGHT
+      new THREE.Vector3(2.2, 0.0, 0),   // UI/UX (index 6): morph RIGHT, text LEFT
+      new THREE.Vector3(-2.2, 0.0, 0),  // Planning (index 7): morph LEFT, text RIGHT
+      new THREE.Vector3(2.2, 0.0, 0),   // Project (index 8): morph RIGHT, text LEFT
+      new THREE.Vector3(-2.2, 0.0, 0),  // Security (index 9): morph LEFT, text RIGHT
+      new THREE.Vector3(2.2, 0.0, 0),   // Internet (index 10): morph RIGHT, text LEFT
+      new THREE.Vector3(-2.2, 0.0, 0),  // Marketing (index 11): morph LEFT, text RIGHT
       new THREE.Vector3(0.0, 0.0, 0),   // Outro: center
     ];
   }, [isMobile]);
@@ -714,11 +1133,17 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
   // Colors per section
   const sectionColors = [
     new THREE.Color('#ffffff'), // Intro
-    new THREE.Color('#9bd7ff'), // Medical (blue)
-    new THREE.Color('#9ffcf0'), // Web (cyan)
-    new THREE.Color('#e0e0e0'), // Robotics (silver)
-    new THREE.Color('#d6b6ff'), // Gaming (purple)
-    new THREE.Color('#a8ffe8'), // Blockchain (mint)
+    new THREE.Color('#9bd7ff'), // Hosting (blue)
+    new THREE.Color('#9ffcf0'), // Consultation (cyan)
+    new THREE.Color('#e0e0e0'), // Web Dev (silver)
+    new THREE.Color('#d6b6ff'), // Configuration (purple)
+    new THREE.Color('#a8ffe8'), // Cloud (mint)
+    new THREE.Color('#ff9b9b'), // UI/UX (coral)
+    new THREE.Color('#4ecdc4'), // Planning (teal)
+    new THREE.Color('#45b7d1'), // Project (blue)
+    new THREE.Color('#96ceb4'), // Security (mint)
+    new THREE.Color('#ffeaa7'), // Internet (yellow)
+    new THREE.Color('#dda0dd'), // Marketing (plum)
     new THREE.Color('#ffffff'), // Outro
   ];
 
@@ -732,15 +1157,15 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
     const heroHeight = viewportHeight; // 100vh
     const sectionHeight = viewportHeight; // 100vh per section now
     
-    // Total page: Hero (100vh) + 6 sections (100vh each) = 700vh
-    const totalPageHeight = heroHeight + (sectionHeight * 6);
+    // Total page: Hero (100vh) + 11 sections (100vh each) + Outro (100vh) = 1300vh
+    const totalPageHeight = heroHeight + (sectionHeight * 11) + heroHeight;
     
     // Calculate normalized scroll (0 to 1 across entire page)
     let normalizedScroll = scrollY / totalPageHeight;
     normalizedScroll = Math.min(0.9999, Math.max(0, normalizedScroll));
     
-    // Map to 7 morph sections (hero→medical→web→robotics→gaming→blockchain→outro)
-    const morphSections = 7;
+    // Map to 13 morph sections (intro→hosting→consultation→webdev→config→cloud→uiux→planning→project→security→internet→marketing→outro)
+    const morphSections = 13;
     const sectionIndex = normalizedScroll * morphSections;
     let currentMorphIndex = Math.floor(sectionIndex);
     let nextMorphIndex = Math.min(currentMorphIndex + 1, morphSections - 1);

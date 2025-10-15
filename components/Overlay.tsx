@@ -9,6 +9,25 @@ import HeroHUD from './HeroHUD';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Service links mapping
+const getServiceLink = (serviceId: string): string => {
+  const serviceLinks: Record<string, string> = {
+    hosting: 'https://xceedconnections.com/services', // Hosting services page
+    consultation: 'https://xceedconnections.com/services', // Business consultation
+    webdev: 'https://xceedconnections.com/services', // Website development
+    configuration: 'https://xceedconnections.com/contact-us', // Configuration services - contact
+    cloud: 'https://xceedconnections.com/services', // Cloud support
+    uiux: 'https://xceedconnections.com/services', // UI/UX Design
+    planning: 'https://xceedconnections.com/contact-us', // Business planning - contact
+    project: 'https://xceedconnections.com/services', // Project management
+    security: 'https://xceedconnections.com/services', // Cyber security
+    internet: 'https://xceedconnections.com/contact-us', // Internet thinking - contact
+    marketing: 'https://xceedconnections.com/services', // Digital marketing
+  };
+  
+  return serviceLinks[serviceId] || 'https://xceedconnections.com/contact-us';
+};
+
 // Tech logos for each section
 const sectionLogos: Record<string, string[]> = {
     hosting: [
@@ -176,7 +195,7 @@ const SectionUI: React.FC<{ section: SectionData, index: number }> = ({ section,
                 )}
                 
                 <div className="mt-6">
-                    <a className="inline-block pointer-events-auto px-6 py-3 border border-white/60 text-white rounded-lg hover:bg-white hover:text-black transition" href="https://xceedconnections.com/contact-us">Get Started</a>
+                    <a className="inline-block pointer-events-auto px-6 py-3 border border-white/60 text-white rounded-lg hover:bg-white hover:text-black transition" href={getServiceLink(section.id)}>Get Started</a>
                 </div>
             </div>
         </section>

@@ -22,14 +22,6 @@ export default function HeroHUD() {
       className="fixed inset-0 flex flex-col items-center justify-center"
       style={{ zIndex: 200, pointerEvents: 'none', transform: `translateY(${y}px)` }}
     >
-      {/* Logo above title */}
-      <img
-        src="/favicon.png"
-        onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/favicon.svg'; }}
-        alt="Vektor Logo"
-        className="mb-4"
-        style={{ width: 80, height: 80, objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(42,242,209,0.8))', opacity: 'var(--hud-opacity, 1)' }}
-      />
       <h1
         className="text-[10vw] md:text-[8vw] font-light text-center px-4"
         style={{ 
@@ -40,7 +32,7 @@ export default function HeroHUD() {
           textIndent: '0.3em' // Compensate for letter-spacing pushing text right
         }}
       >
-        VEKTOR SOLUTIONS
+        XCEED CONNECTIONS
       </h1>
       <div 
         className="mt-6 text-xl md:text-2xl text-center px-8" 
@@ -51,7 +43,7 @@ export default function HeroHUD() {
           textIndent: '0.35em' // Compensate for letter-spacing
         }}
       >
-        BUILDING THE FUTURE — ONE SYSTEM AT A TIME
+        EXCEEDING CONNECTIONS WITH QUALITY
       </div>
 
       {/* Subtle HUD corners */}
