@@ -164,8 +164,8 @@ const SectionUI: React.FC<{ section: SectionData, index: number }> = ({ section,
             <div 
                 className="max-w-3xl mx-auto text-center md:text-left md:mx-0"
                 style={{ 
-                    marginLeft: typeof window !== 'undefined' && window.innerWidth >= 768 ? (morphRight ? 'auto' : '6rem') : undefined,
-                    marginRight: typeof window !== 'undefined' && window.innerWidth >= 768 ? (morphRight ? '6rem' : 'auto') : undefined,
+                    marginLeft: morphRight ? 'auto' : '6rem',
+                    marginRight: morphRight ? '6rem' : 'auto',
                 }}
             >
                 <h2 ref={titleRef} className="text-4xl md:text-6xl font-bold mb-3" style={{ color: section.accentColor }}>{section.title}</h2>
@@ -176,7 +176,7 @@ const SectionUI: React.FC<{ section: SectionData, index: number }> = ({ section,
                 
                 {/* Tech Stack Logos */}
                 {logos.length > 0 && (
-                    <div className="mt-8 flex flex-wrap gap-4 items-center justify-center md:justify-start" style={{ justifyContent: typeof window !== 'undefined' && window.innerWidth >= 768 ? textAlign as any : 'center' }}>
+                    <div className="mt-8 flex flex-wrap gap-4 items-center justify-center md:justify-start" style={{ justifyContent: textAlign as any }}>
                         {logos.map((logoUrl, i) => (
                             <div 
                                 key={i} 
