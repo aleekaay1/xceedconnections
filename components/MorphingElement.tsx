@@ -10,7 +10,7 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
   const pointsRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
 
-  const totalSections = 7;
+  const totalSections = 13;
   const particleCount = 800; // More particles for smoother shapes
 
   // Circular sprite texture
@@ -56,272 +56,20 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
     return arr;
   };
 
-  // MEDICAL: Clean DNA Double Helix (like the reference image)
-  const makeDNA = (): Float32Array => {
+  // HOSTING: Server Rack
+  const makeServerRack = (): Float32Array => {
     const arr = new Float32Array(particleCount * 3);
-    const length = 4.5; // Shorter vertical strand
-    const turns = 3; // Number of complete helical turns
-    const radius = 0.65; // Distance from center axis
-    
-    // All particles go to the two helixes - no base pairs
-    const particlesPerStrand = Math.floor(particleCount / 2);
+    const w = 2.5, h = 3.5;
+    const servers = 4;
+    const serverH = h / servers;
     
     let idx = 0;
     
-    // First strand (helix 1)
-    for (let i = 0; i < particlesPerStrand && idx < particleCount; i++) {
-      const t = i / particlesPerStrand;
-      const y = (t - 0.5) * length;
-      const angle = t * turns * Math.PI * 2;
-      
-      // Smooth taper (wider in middle, narrower at ends)
-      const taper = 0.8 + 0.2 * Math.sin(t * Math.PI);
-      const r = radius * taper;
-      
-      arr[idx * 3] = Math.cos(angle) * r;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = Math.sin(angle) * r;
-      idx++;
-    }
-    
-    // Second strand (helix 2) - 180 degrees out of phase
-    for (let i = 0; i < particlesPerStrand && idx < particleCount; i++) {
-      const t = i / particlesPerStrand;
-      const y = (t - 0.5) * length;
-      const angle = t * turns * Math.PI * 2 + Math.PI; // Opposite side
-      
-      // Smooth taper (wider in middle, narrower at ends)
-      const taper = 0.8 + 0.2 * Math.sin(t * Math.PI);
-      const r = radius * taper;
-      
-      arr[idx * 3] = Math.cos(angle) * r;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = Math.sin(angle) * r;
-      idx++;
-    }
-    
-    // Fill any remaining
-    for (; idx < particleCount; idx++) {
-      arr[idx * 3] = 0;
-      arr[idx * 3 + 1] = 0;
-      arr[idx * 3 + 2] = 0;
-    }
-    
-    return arr;
-  };
-
-  // WEB DEV: Computer Monitor with Stand and Desktop Icons
-  const makeWebScreen = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const w = 3.5, h = 2.2; // Screen dimensions
-    const standW = 0.4, standH = 1.0; // Stand dimensions
-    const baseW = 1.2, baseH = 0.15; // Base dimensions
-    
-    let idx = 0;
-    
-    // Screen border (40% of particles)
-    const borderCount = Math.floor(particleCount * 0.4);
+    // Server rack frame (30% of particles)
+    const frameCount = Math.floor(particleCount * 0.3);
     const perimeter = (w + h) * 2;
-    for (let i = 0; i < borderCount && idx < particleCount; i++) {
-      const t = i / borderCount;
-      const dist = t * perimeter;
-      let x = 0, y = 0;
-      
-      if (dist < w) {
-        x = -w/2 + dist;
-        y = h/2;
-      } else if (dist < w + h) {
-        x = w/2;
-        y = h/2 - (dist - w);
-      } else if (dist < 2*w + h) {
-        x = w/2 - (dist - w - h);
-        y = -h/2;
-      } else {
-        x = -w/2;
-        y = -h/2 + (dist - 2*w - h);
-      }
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y + 0.5; // Lift screen up
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Desktop icons (grid inside screen) (30% of particles)
-    const iconCount = Math.floor(particleCount * 0.3);
-    const cols = 6, rows = 4;
-    for (let i = 0; i < iconCount && idx < particleCount; i++) {
-      const iconIdx = Math.floor((i / iconCount) * (cols * rows));
-      const row = Math.floor(iconIdx / cols);
-      const col = iconIdx % cols;
-      
-      const x = -w/2 + 0.4 + (col / (cols - 1)) * (w - 0.8);
-      const y = h/2 - 0.4 - (row / (rows - 1)) * (h - 0.8);
-      
-      // Deterministic offset based on particle index (no random)
-      const offsetX = ((i % 5) - 2) * 0.03; // -0.06 to 0.06
-      const offsetY = (Math.floor(i / 5) % 5 - 2) * 0.03;
-      
-      arr[idx * 3] = x + offsetX;
-      arr[idx * 3 + 1] = y + 0.5 + offsetY;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Stand (20% of particles)
-    const standCount = Math.floor(particleCount * 0.2);
-    for (let i = 0; i < standCount && idx < particleCount; i++) {
-      const t = i / standCount;
-      // Deterministic x position based on index
-      const x = ((i % 7) - 3) * (standW / 6);
-      const y = -h/2 + 0.5 - (t * standH);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Base (10% of particles)
-    const baseStart = idx;
-    for (; idx < particleCount; idx++) {
-      const localIdx = idx - baseStart;
-      // Deterministic x position
-      const x = ((localIdx % 9) - 4) * (baseW / 8);
-      const y = -h/2 + 0.5 - standH - baseH/2;
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-    }
-    
-    return arr;
-  };
-
-  // ROBOTICS: Classic Robot Shape
-  const makeRobot = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const bodyW = 1.0, bodyH = 1.2; // Body (rectangle)
-    const headR = 0.4; // Head (circle)
-    const limbW = 0.15, limbH = 0.8; // Limbs
-    
-    let idx = 0;
-    
-    // Body rectangle (30% of particles)
-    const bodyCount = Math.floor(particleCount * 0.3);
-    const bodyPerimeter = (bodyW + bodyH) * 2;
-    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
-      const t = i / bodyCount;
-      const dist = t * bodyPerimeter;
-      let x = 0, y = 0;
-      
-      if (dist < bodyW) {
-        x = -bodyW/2 + dist;
-        y = bodyH/2;
-      } else if (dist < bodyW + bodyH) {
-        x = bodyW/2;
-        y = bodyH/2 - (dist - bodyW);
-      } else if (dist < 2*bodyW + bodyH) {
-        x = bodyW/2 - (dist - bodyW - bodyH);
-        y = -bodyH/2;
-      } else {
-        x = -bodyW/2;
-        y = -bodyH/2 + (dist - 2*bodyW - bodyH);
-      }
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Head circle (20% of particles)
-    const headCount = Math.floor(particleCount * 0.2);
-    for (let i = 0; i < headCount && idx < particleCount; i++) {
-      const angle = (i / headCount) * Math.PI * 2;
-      const x = Math.cos(angle) * headR;
-      const y = bodyH/2 + 0.2 + headR + Math.sin(angle) * headR;
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Arms - left and right (15% each = 30% total)
-    const armCount = Math.floor(particleCount * 0.15);
-    for (let i = 0; i < armCount && idx < particleCount; i++) {
-      const t = i / armCount;
-      const x = -bodyW/2 - limbW/2;
-      const y = bodyH/2 - 0.2 - (t * limbH);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    for (let i = 0; i < armCount && idx < particleCount; i++) {
-      const t = i / armCount;
-      const x = bodyW/2 + limbW/2;
-      const y = bodyH/2 - 0.2 - (t * limbH);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Legs - left and right (10% each = 20% total)
-    const legCount = Math.floor(particleCount * 0.1);
-    for (let i = 0; i < legCount && idx < particleCount; i++) {
-      const t = i / legCount;
-      const x = -bodyW/3;
-      const y = -bodyH/2 - (t * limbH);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    for (let i = 0; i < legCount && idx < particleCount; i++) {
-      const t = i / legCount;
-      const x = bodyW/3;
-      const y = -bodyH/2 - (t * limbH);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Antennas (remaining particles)
-    for (; idx < particleCount; idx++) {
-      const side = (idx % 2) ? 1 : -1;
-      const t = Math.random();
-      const x = side * headR * 0.6;
-      const y = bodyH/2 + 0.2 + headR * 2 + (t * 0.4);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-    }
-    
-    return arr;
-  };
-
-  // GAMING: Game Controller (PS4 style)
-  const makeController = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const w = 3.2, h = 1.6;
-    const gripW = 0.6, gripH = 1.2;
-    
-    let idx = 0;
-    
-    // Main body outline (40% of particles)
-    const bodyCount = Math.floor(particleCount * 0.4);
-    const perimeter = (w + h) * 2;
-    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
-      const t = i / bodyCount;
+    for (let i = 0; i < frameCount && idx < particleCount; i++) {
+      const t = i / frameCount;
       const dist = t * perimeter;
       let x = 0, y = 0;
       
@@ -345,52 +93,14 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
       idx++;
     }
     
-    // D-Pad (left side) - Plus shape (20% of particles)
-    const dpadCount = Math.floor(particleCount * 0.2);
-    const dpadSize = 0.5;
-    for (let i = 0; i < dpadCount && idx < particleCount; i++) {
-      const t = i / dpadCount;
-      let x = 0, y = 0;
-      
-      if (t < 0.25) {
-        // Up
-        x = -w/3;
-        y = 0.1 + (t / 0.25) * dpadSize;
-      } else if (t < 0.5) {
-        // Down
-        x = -w/3;
-        y = 0.1 - ((t - 0.25) / 0.25) * dpadSize;
-      } else if (t < 0.75) {
-        // Left
-        x = -w/3 - ((t - 0.5) / 0.25) * dpadSize;
-        y = 0.1;
-      } else {
-        // Right
-        x = -w/3 + ((t - 0.75) / 0.25) * dpadSize;
-        y = 0.1;
-      }
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-      idx++;
-    }
-    
-    // Action buttons (right side) - 4 circles (20% of particles)
-    const buttonCount = Math.floor(particleCount * 0.05);
-    const buttonPositions = [
-      { x: w/3, y: 0.5 }, // Triangle/Y
-      { x: w/3, y: -0.3 }, // Cross/A
-      { x: w/3 - 0.4, y: 0.1 }, // Square/X
-      { x: w/3 + 0.4, y: 0.1 }, // Circle/B
-    ];
-    
-    for (let b = 0; b < 4; b++) {
-      for (let i = 0; i < buttonCount && idx < particleCount; i++) {
-        const angle = (i / buttonCount) * Math.PI * 2;
-        const r = 0.2;
-        const x = buttonPositions[b].x + Math.cos(angle) * r;
-        const y = buttonPositions[b].y + Math.sin(angle) * r;
+    // Individual servers (60% of particles)
+    const serverCount = Math.floor(particleCount * 0.6 / servers);
+    for (let s = 0; s < servers; s++) {
+      const serverY = h/2 - (s + 0.5) * serverH;
+      for (let i = 0; i < serverCount && idx < particleCount; i++) {
+        const t = i / serverCount;
+        const x = -w/2 + 0.1 + (t * (w - 0.2));
+        const y = serverY;
         
         arr[idx * 3] = x;
         arr[idx * 3 + 1] = y;
@@ -399,83 +109,7 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
       }
     }
     
-    // Fill remaining with grip details
-    for (; idx < particleCount; idx++) {
-      const side = (idx % 2) ? 1 : -1;
-      const x = side * (w/2 + (Math.random() * gripW));
-      const y = -h/2 - (Math.random() * gripH);
-      
-      arr[idx * 3] = x;
-      arr[idx * 3 + 1] = y;
-      arr[idx * 3 + 2] = 0;
-    }
-    
-    return arr;
-  };
-
-  // BLOCKCHAIN: Chain of Connected Blocks
-  const makeBlockchain = (): Float32Array => {
-    const arr = new Float32Array(particleCount * 3);
-    const blocks = 5;
-    const blockSize = 1.1;
-    const spacing = 1.6;
-    const particlesPerBlock = Math.floor(particleCount * 0.85 / blocks);
-    const particlesPerLink = Math.floor(particleCount * 0.15 / (blocks - 1));
-    
-    let idx = 0;
-    
-    // Create blocks along a diagonal
-    for (let b = 0; b < blocks && idx < particleCount; b++) {
-      const cx = (b - (blocks - 1) / 2) * spacing;
-      const cy = (b - (blocks - 1) / 2) * 0.6;
-      const half = blockSize / 2;
-      const perimeter = blockSize * 4;
-      
-      // Block perimeter
-      for (let i = 0; i < particlesPerBlock && idx < particleCount; i++) {
-        const t = i / particlesPerBlock;
-        const dist = t * perimeter;
-        let x = 0, y = 0;
-        
-        if (dist < blockSize) {
-          x = -half + dist;
-          y = half;
-        } else if (dist < 2 * blockSize) {
-          x = half;
-          y = half - (dist - blockSize);
-        } else if (dist < 3 * blockSize) {
-          x = half - (dist - 2 * blockSize);
-          y = -half;
-        } else {
-          x = -half;
-          y = -half + (dist - 3 * blockSize);
-        }
-        
-        arr[idx * 3] = cx + x;
-        arr[idx * 3 + 1] = cy + y;
-        arr[idx * 3 + 2] = 0;
-        idx++;
-      }
-      
-      // Link to next block (diagonal line)
-      if (b < blocks - 1) {
-        const nextCx = ((b + 1) - (blocks - 1) / 2) * spacing;
-        const nextCy = ((b + 1) - (blocks - 1) / 2) * 0.6;
-        
-        for (let i = 0; i < particlesPerLink && idx < particleCount; i++) {
-          const t = i / particlesPerLink;
-          const x = THREE.MathUtils.lerp(cx + half, nextCx - half, t);
-          const y = THREE.MathUtils.lerp(cy - half, nextCy + half, t);
-          
-          arr[idx * 3] = x;
-          arr[idx * 3 + 1] = y;
-          arr[idx * 3 + 2] = 0;
-          idx++;
-        }
-      }
-    }
-    
-    // Fill any remaining
+    // Fill remaining
     for (; idx < particleCount; idx++) {
       arr[idx * 3] = 0;
       arr[idx * 3 + 1] = 0;
@@ -485,14 +119,553 @@ export default function MorphingElement({ scrollProgress }: MorphingElementProps
     return arr;
   };
 
+  // CONSULTATION: Briefcase
+  const makeBriefcase = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 3.0, h = 2.0, d = 0.8;
+    
+    let idx = 0;
+    
+    // Briefcase body (60% of particles)
+    const bodyCount = Math.floor(particleCount * 0.6);
+    const perimeter = (w + h) * 2;
+    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
+      const t = i / bodyCount;
+      const dist = t * perimeter;
+      let x = 0, y = 0;
+      
+      if (dist < w) {
+        x = -w/2 + dist;
+        y = h/2;
+      } else if (dist < w + h) {
+        x = w/2;
+        y = h/2 - (dist - w);
+      } else if (dist < 2*w + h) {
+        x = w/2 - (dist - w - h);
+        y = -h/2;
+      } else {
+        x = -w/2;
+        y = -h/2 + (dist - 2*w - h);
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Handle (20% of particles)
+    const handleCount = Math.floor(particleCount * 0.2);
+    for (let i = 0; i < handleCount && idx < particleCount; i++) {
+      const t = i / handleCount;
+      const x = -w/3 + (t * (2*w/3));
+      const y = h/2 + 0.3;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Locks (20% of particles)
+    const lockCount = Math.floor(particleCount * 0.2);
+    for (let i = 0; i < lockCount && idx < particleCount; i++) {
+      const side = (i % 2) ? 1 : -1;
+      const x = side * w/4;
+      const y = h/2 - 0.3;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
+  // WEB DEV: Code Brackets
+  const makeCodeBrackets = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 2.5, h = 3.0;
+    
+    let idx = 0;
+    
+    // Left bracket (50% of particles)
+    const leftCount = Math.floor(particleCount * 0.5);
+    for (let i = 0; i < leftCount && idx < particleCount; i++) {
+      const t = i / leftCount;
+      const x = -w/2;
+      const y = h/2 - (t * h);
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Right bracket (50% of particles)
+    const rightCount = Math.floor(particleCount * 0.5);
+    for (let i = 0; i < rightCount && idx < particleCount; i++) {
+      const t = i / rightCount;
+      const x = w/2;
+      const y = h/2 - (t * h);
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
+  // CONFIGURATION: Gear/Cog
+  const makeGear = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const radius = 1.5;
+    const teeth = 12;
+    const toothLength = 0.4;
+    
+    let idx = 0;
+    
+    // Main gear circle (60% of particles)
+    const circleCount = Math.floor(particleCount * 0.6);
+    for (let i = 0; i < circleCount && idx < particleCount; i++) {
+      const angle = (i / circleCount) * Math.PI * 2;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Gear teeth (40% of particles)
+    const toothCount = Math.floor(particleCount * 0.4);
+    for (let i = 0; i < toothCount && idx < particleCount; i++) {
+      const toothIdx = Math.floor((i / toothCount) * teeth);
+      const angle = (toothIdx / teeth) * Math.PI * 2;
+      const x = Math.cos(angle) * (radius + toothLength);
+      const y = Math.sin(angle) * (radius + toothLength);
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
+  // CLOUD: Cloud Shape
+  const makeCloud = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const centerRadius = 1.2;
+    const sideRadius = 0.8;
+    const topRadius = 1.0;
+    
+    let idx = 0;
+    
+    // Main cloud body (80% of particles)
+    const bodyCount = Math.floor(particleCount * 0.8);
+    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
+      const t = i / bodyCount;
+      const angle = t * Math.PI * 2;
+      
+      // Create cloud-like shape with multiple circles
+      let x = 0, y = 0;
+      if (t < 0.3) {
+        // Left side
+        x = -0.8 + Math.cos(angle * 0.3) * sideRadius;
+        y = Math.sin(angle * 0.3) * sideRadius;
+      } else if (t < 0.7) {
+        // Center
+        x = Math.cos(angle * 0.4) * centerRadius;
+        y = Math.sin(angle * 0.4) * centerRadius;
+      } else {
+        // Right side
+        x = 0.8 + Math.cos(angle * 0.3) * sideRadius;
+        y = Math.sin(angle * 0.3) * sideRadius;
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Top cloud puff (20% of particles)
+    const topCount = Math.floor(particleCount * 0.2);
+    for (let i = 0; i < topCount && idx < particleCount; i++) {
+      const angle = (i / topCount) * Math.PI * 2;
+      const x = Math.cos(angle) * topRadius;
+      const y = 1.0 + Math.sin(angle) * topRadius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
+  // UI/UX: Design Palette
+  const makeDesignPalette = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 2.5, h = 3.0;
+    
+    let idx = 0;
+    
+    // Palette outline (40% of particles)
+    const outlineCount = Math.floor(particleCount * 0.4);
+    const perimeter = (w + h) * 2;
+    for (let i = 0; i < outlineCount && idx < particleCount; i++) {
+      const t = i / outlineCount;
+      const dist = t * perimeter;
+      let x = 0, y = 0;
+      
+      if (dist < w) {
+        x = -w/2 + dist;
+        y = h/2;
+      } else if (dist < w + h) {
+        x = w/2;
+        y = h/2 - (dist - w);
+      } else if (dist < 2*w + h) {
+        x = w/2 - (dist - w - h);
+        y = -h/2;
+      } else {
+        x = -w/2;
+        y = -h/2 + (dist - 2*w - h);
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Color circles (60% of particles)
+    const colorCount = Math.floor(particleCount * 0.6);
+    const colors = 6;
+    for (let c = 0; c < colors; c++) {
+      const circleCount = Math.floor(colorCount / colors);
+      const angle = (c / colors) * Math.PI * 2;
+      const radius = 0.3;
+      const centerX = Math.cos(angle) * 0.8;
+      const centerY = Math.sin(angle) * 0.8;
+      
+      for (let i = 0; i < circleCount && idx < particleCount; i++) {
+        const t = i / circleCount;
+        const circleAngle = t * Math.PI * 2;
+        const x = centerX + Math.cos(circleAngle) * radius;
+        const y = centerY + Math.sin(circleAngle) * radius;
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    return arr;
+  };
+
+  // PLANNING: Chart/Graph
+  const makeChart = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 3.0, h = 2.5;
+    
+    let idx = 0;
+    
+    // Chart axes (30% of particles)
+    const axisCount = Math.floor(particleCount * 0.3);
+    for (let i = 0; i < axisCount && idx < particleCount; i++) {
+      const t = i / axisCount;
+      if (t < 0.5) {
+        // X-axis
+        const x = -w/2 + (t * 2) * w;
+        const y = -h/2;
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+      } else {
+        // Y-axis
+        const x = -w/2;
+        const y = -h/2 + ((t - 0.5) * 2) * h;
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+      }
+      idx++;
+    }
+    
+    // Chart bars (70% of particles)
+    const barCount = Math.floor(particleCount * 0.7);
+    const bars = 5;
+    for (let b = 0; b < bars; b++) {
+      const barParticles = Math.floor(barCount / bars);
+      const x = -w/2 + 0.3 + (b * (w - 0.6) / (bars - 1));
+      const barHeight = 0.3 + (b * 0.4);
+      
+      for (let i = 0; i < barParticles && idx < particleCount; i++) {
+        const t = i / barParticles;
+        const y = -h/2 + (t * barHeight);
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    return arr;
+  };
+
+  // PROJECT: Project Management Board
+  const makeProjectBoard = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 3.5, h = 2.5;
+    const columns = 3;
+    
+    let idx = 0;
+    
+    // Board outline (30% of particles)
+    const outlineCount = Math.floor(particleCount * 0.3);
+    const perimeter = (w + h) * 2;
+    for (let i = 0; i < outlineCount && idx < particleCount; i++) {
+      const t = i / outlineCount;
+      const dist = t * perimeter;
+      let x = 0, y = 0;
+      
+      if (dist < w) {
+        x = -w/2 + dist;
+        y = h/2;
+      } else if (dist < w + h) {
+        x = w/2;
+        y = h/2 - (dist - w);
+      } else if (dist < 2*w + h) {
+        x = w/2 - (dist - w - h);
+        y = -h/2;
+      } else {
+        x = -w/2;
+        y = -h/2 + (dist - 2*w - h);
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Column dividers (20% of particles)
+    const dividerCount = Math.floor(particleCount * 0.2);
+    for (let c = 1; c < columns; c++) {
+      const x = -w/2 + (c * w / columns);
+      for (let i = 0; i < dividerCount / (columns - 1) && idx < particleCount; i++) {
+        const t = i / (dividerCount / (columns - 1));
+        const y = -h/2 + (t * h);
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Task cards (50% of particles)
+    const cardCount = Math.floor(particleCount * 0.5);
+    const cardsPerColumn = 3;
+    for (let col = 0; col < columns; col++) {
+      for (let card = 0; card < cardsPerColumn; card++) {
+        const cardParticles = Math.floor(cardCount / (columns * cardsPerColumn));
+        const x = -w/2 + (col + 0.5) * (w / columns);
+        const y = h/2 - 0.3 - (card * 0.6);
+        
+        for (let i = 0; i < cardParticles && idx < particleCount; i++) {
+          const t = i / cardParticles;
+          const cardX = x + ((t % 2) - 0.5) * 0.4;
+          const cardY = y + (Math.floor(t / 2) - 0.5) * 0.2;
+          
+          arr[idx * 3] = cardX;
+          arr[idx * 3 + 1] = cardY;
+          arr[idx * 3 + 2] = 0;
+          idx++;
+        }
+      }
+    }
+    
+    return arr;
+  };
+
+  // SECURITY: Shield
+  const makeShield = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const w = 2.0, h = 3.0;
+    
+    let idx = 0;
+    
+    // Shield outline (60% of particles)
+    const outlineCount = Math.floor(particleCount * 0.6);
+    for (let i = 0; i < outlineCount && idx < particleCount; i++) {
+      const t = i / outlineCount;
+      let x = 0, y = 0;
+      
+      if (t < 0.3) {
+        // Top curve
+        const angle = (t / 0.3) * Math.PI;
+        x = Math.sin(angle) * (w / 2);
+        y = h/2 - Math.cos(angle) * (h / 2);
+      } else if (t < 0.7) {
+        // Sides
+        const sideT = (t - 0.3) / 0.4;
+        const side = sideT < 0.5 ? -1 : 1;
+        const sideProgress = sideT < 0.5 ? sideT * 2 : (sideT - 0.5) * 2;
+        x = side * (w / 2);
+        y = h/2 - sideProgress * h;
+      } else {
+        // Bottom point
+        const bottomT = (t - 0.7) / 0.3;
+        x = (1 - bottomT) * (w / 2);
+        y = -h/2 + bottomT * 0.2;
+      }
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Lock symbol (40% of particles)
+    const lockCount = Math.floor(particleCount * 0.4);
+    for (let i = 0; i < lockCount && idx < particleCount; i++) {
+      const t = i / lockCount;
+      const angle = t * Math.PI * 2;
+      const radius = 0.3;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
+  // INTERNET: Network Nodes
+  const makeNetwork = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const nodes = 6;
+    const radius = 1.5;
+    
+    let idx = 0;
+    
+    // Network nodes (50% of particles)
+    const nodeCount = Math.floor(particleCount * 0.5);
+    for (let n = 0; n < nodes; n++) {
+      const nodeParticles = Math.floor(nodeCount / nodes);
+      const angle = (n / nodes) * Math.PI * 2;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      
+      for (let i = 0; i < nodeParticles && idx < particleCount; i++) {
+        const t = i / nodeParticles;
+        const nodeAngle = t * Math.PI * 2;
+        const nodeRadius = 0.2;
+        const nodeX = x + Math.cos(nodeAngle) * nodeRadius;
+        const nodeY = y + Math.sin(nodeAngle) * nodeRadius;
+        
+        arr[idx * 3] = nodeX;
+        arr[idx * 3 + 1] = nodeY;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    // Connection lines (50% of particles)
+    const lineCount = Math.floor(particleCount * 0.5);
+    for (let n = 0; n < nodes; n++) {
+      const nextN = (n + 1) % nodes;
+      const angle1 = (n / nodes) * Math.PI * 2;
+      const angle2 = (nextN / nodes) * Math.PI * 2;
+      const x1 = Math.cos(angle1) * radius;
+      const y1 = Math.sin(angle1) * radius;
+      const x2 = Math.cos(angle2) * radius;
+      const y2 = Math.sin(angle2) * radius;
+      
+      const lineParticles = Math.floor(lineCount / nodes);
+      for (let i = 0; i < lineParticles && idx < particleCount; i++) {
+        const t = i / lineParticles;
+        const x = x1 + (x2 - x1) * t;
+        const y = y1 + (y2 - y1) * t;
+        
+        arr[idx * 3] = x;
+        arr[idx * 3 + 1] = y;
+        arr[idx * 3 + 2] = 0;
+        idx++;
+      }
+    }
+    
+    return arr;
+  };
+
+  // MARKETING: Megaphone
+  const makeMegaphone = (): Float32Array => {
+    const arr = new Float32Array(particleCount * 3);
+    const length = 3.0;
+    const startRadius = 0.3;
+    const endRadius = 1.2;
+    
+    let idx = 0;
+    
+    // Megaphone body (80% of particles)
+    const bodyCount = Math.floor(particleCount * 0.8);
+    for (let i = 0; i < bodyCount && idx < particleCount; i++) {
+      const t = i / bodyCount;
+      const angle = t * Math.PI * 2;
+      const currentRadius = startRadius + (t * (endRadius - startRadius));
+      const x = Math.cos(angle) * currentRadius;
+      const y = -length/2 + (t * length);
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    // Handle (20% of particles)
+    const handleCount = Math.floor(particleCount * 0.2);
+    for (let i = 0; i < handleCount && idx < particleCount; i++) {
+      const t = i / handleCount;
+      const x = -startRadius - 0.2;
+      const y = -length/2 + (t * 0.8);
+      
+      arr[idx * 3] = x;
+      arr[idx * 3 + 1] = y;
+      arr[idx * 3 + 2] = 0;
+      idx++;
+    }
+    
+    return arr;
+  };
+
   // Precompute all shapes
   const sectionShapes = useMemo(() => [
     makeFibonacciSphere(1.8), // Intro
-    makeDNA(),                // Medical
-    makeWebScreen(),          // Web Dev
-    makeRobot(),              // Robotics
-    makeController(),         // Gaming
-    makeBlockchain(),         // Blockchain
+    makeServerRack(),         // Hosting
+    makeBriefcase(),          // Consultation
+    makeCodeBrackets(),       // Web Dev
+    makeGear(),               // Configuration
+    makeCloud(),              // Cloud Support
+    makeDesignPalette(),      // UI/UX Design
+    makeChart(),              // Business Planning
+    makeProjectBoard(),       // Project Management
+    makeShield(),             // Cyber Security
+    makeNetwork(),            // Internet Thinking
+    makeMegaphone(),          // Digital Marketing
     makeFibonacciSphere(1.6), // Outro
   ], [particleCount]);
 

@@ -8,8 +8,8 @@ import Cursor from './components/Cursor';
 import { SECTIONS } from './constants';
 
 export default function App() {
-  // Hero (100vh) + 5 content sections (100vh each) + Outro (100vh) = 700vh
-  const totalHeight = 100 + (5 * 100) + 100; // vh
+  // Hero (100vh) + 11 content sections (100vh each) + Outro (100vh) = 1300vh
+  const totalHeight = 100 + (11 * 100) + 100; // vh
 
   return (
     <div className="relative w-full" style={{ height: `${totalHeight}vh` }}>
